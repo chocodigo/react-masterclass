@@ -1,11 +1,12 @@
-import {Link, useLocation, useParams, useRouteMatch} from "react-router-dom";
+import { Link, useLocation, useParams, useRouteMatch } from "react-router-dom";
 import styled from "styled-components";
 import { useEffect, useState } from "react";
-import {Switch,Route} from "react-router-dom";
+import { Switch, Route } from "react-router-dom";
 import Price from "./Price";
 import Chart from "./Chart";
-import {useQuery} from "react-query";
-import {fetchCoinInfo, fetchCoinTickers} from "../api";
+import { useQuery } from "react-query";
+import { fetchCoinInfo, fetchCoinTickers } from "../api";
+import { Helmet } from "react-helmet";
 
 const Container = styled.div`
   padding: 0px 20px;
@@ -16,7 +17,7 @@ const Container = styled.div`
 const Header = styled.header`
   height: 10vh;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
 `;
 
@@ -40,6 +41,7 @@ const OverviewItem = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+
   span:first-child {
     font-size: 10px;
     font-weight: 400;
@@ -58,7 +60,7 @@ const Tabs = styled.div`
   gap: 10px;
 `;
 
-const Tab = styled.span<{isActive:boolean}>`
+const Tab = styled.span<{ isActive: boolean }>`
   text-align: center;
   text-transform: uppercase;
   font-size: 12px;
@@ -66,12 +68,37 @@ const Tab = styled.span<{isActive:boolean}>`
   background-color: rgba(0, 0, 0, 0.5);
   padding: 7px 0px;
   border-radius: 10px;
-  color:${props=>props.isActive?props.theme.accentColor:props.theme.textColor};
+  color: ${(props) =>
+    props.isActive ? props.theme.accentColor : props.theme.textColor};
+
   a {
     display: block;
   }
 `;
 
+const BackButton = styled.div`
+  background-color: ${(props) => props.theme.accentColor};
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: ${(props) => props.theme.textColor};
+  border: ${(props) => props.theme.textColor};
+  font-weight: bold;
+  font-size: large;
+  box-shadow: 0.01px 0.01px 0.1em ${(props) => props.theme.textColor};
+
+  &:hover {
+    background-color: #8a5994;
+  }
+`;
+
+const HeaderCompDiv = styled.div`
+  display: block;
+  width: 33%;
+`;
 
 interface RouteParams {
   coinId: string;
@@ -106,72 +133,79 @@ interface InfoData {
 }
 
 interface PriceData {
-  id                 :string  ;
-  name               :string  ;
-  symbol             :string  ;
-  rank               :number  ;
-  circulating_supply :number  ;
-  total_supply       :number  ;
-  max_supply         :number  ;
-  beta_value         :number  ;
-  first_data_at      :string  ;
-  last_updated       :string  ;
-  quotes             :{
-    USD:{
-        ath_date: string;
-        ath_price: number;
-        market_cap: number;
-        market_cap_change_24h: number;
-        percent_change_1h: number;
-        percent_change_1y: number;
-        percent_change_6h: number;
-        percent_change_7d: number;
-        percent_change_12h: number;
-        percent_change_15m: number;
-        percent_change_24h: number;
-        percent_change_30d: number;
-        percent_change_30m: number;
-        percent_from_price_ath: number;
-        price: number;
-        volume_24h: number;
-        volume_24h_change_24h: number;
-    }
-  }  ;
+  id: string;
+  name: string;
+  symbol: string;
+  rank: number;
+  circulating_supply: number;
+  total_supply: number;
+  max_supply: number;
+  beta_value: number;
+  first_data_at: string;
+  last_updated: string;
+  quotes: {
+    USD: {
+      ath_date: string;
+      ath_price: number;
+      market_cap: number;
+      market_cap_change_24h: number;
+      percent_change_1h: number;
+      percent_change_1y: number;
+      percent_change_6h: number;
+      percent_change_7d: number;
+      percent_change_12h: number;
+      percent_change_15m: number;
+      percent_change_24h: number;
+      percent_change_30d: number;
+      percent_change_30m: number;
+      percent_from_price_ath: number;
+      price: number;
+      volume_24h: number;
+      volume_24h_change_24h: number;
+    };
+  };
 }
 
 function Coin() {
   const { coinId } = useParams<RouteParams>();
   const { state } = useLocation<RouteState>();
-  // const [loading, setLoading] = useState(true);
-  // const [info, setInfo] = useState<InfoData>();
-  // const [priceInfo, setPriceInfo] = useState<PriceData>();
-  const priceMatch=useRouteMatch("/:coinId/price");
-  const chartMatch=useRouteMatch("/:coinId/chart");
 
-  const {isLoading : infoLoading ,data: info}=useQuery<InfoData>(["info",coinId],()=>fetchCoinInfo(coinId))
-    const {isLoading : tickersLoading,data:priceInfo}=useQuery<PriceData>(["tickers",coinId],()=>fetchCoinTickers(coinId));
-  //
-  // useEffect(() => {
-  //   (async () => {
-  //     const infoData = await (
-  //       await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)
-  //     ).json();
-  //     const priceData = await (
-  //       await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
-  //     ).json();
-  //     setInfo(infoData);
-  //     setPriceInfo(priceData);
-  //     setLoading(false)
-  //   })();
-  // }, [coinId]);
+  const priceMatch = useRouteMatch("/:coinId/price");
+  const chartMatch = useRouteMatch("/:coinId/chart");
 
-    const loading = infoLoading || tickersLoading;
+  const { isLoading: infoLoading, data: info } = useQuery<InfoData>(
+    ["info", coinId],
+    () => fetchCoinInfo(coinId)
+  );
+  const { isLoading: tickersLoading, data: priceInfo } = useQuery<PriceData>(
+    ["tickers", coinId],
+    () => fetchCoinTickers(coinId),
+    {
+      refetchInterval: 5000,
+    }
+  );
+
+  const loading = infoLoading || tickersLoading;
   return (
     <Container>
-      <Header>
-        <Title>
+      <Helmet>
+        <title>
           {state?.name ? state.name : loading ? "Loading..." : info?.name}
-        </Title>
+        </title>
+      </Helmet>
+
+      <Header>
+        <HeaderCompDiv>
+          <Link to={"/"}>
+            <BackButton>&larr;</BackButton>
+          </Link>
+        </HeaderCompDiv>
+        <HeaderCompDiv>
+          <Title>
+            {state?.name ? state.name : loading ? "Loading..." : info?.name}
+          </Title>
+        </HeaderCompDiv>
+        <HeaderCompDiv> </HeaderCompDiv>
       </Header>
 
       {loading ? (
@@ -188,8 +222,8 @@ function Coin() {
               <span>${info?.symbol}</span>
             </OverviewItem>
             <OverviewItem>
-              <span>Open Source:</span>
-              <span>{info?.open_source ? "Yes" : "No"}</span>
+              <span>Price:</span>
+              <span>{priceInfo?.quotes.USD.price}</span>
             </OverviewItem>
           </Overview>
           <Description>{info?.description}</Description>
@@ -204,22 +238,21 @@ function Coin() {
             </OverviewItem>
           </Overview>
 
-            <Tabs>
-                <Tab isActive={chartMatch !== null}>
-                    <Link to={`/${coinId}/chart`}>Chart</Link>
-                </Tab>
-                <Tab isActive={priceMatch !== null}>
-                    <Link to={`/${coinId}/price`}>Price</Link>
-                </Tab>
-            </Tabs>
+          <Tabs>
+            <Tab isActive={chartMatch !== null}>
+              <Link to={`/${coinId}/chart`}>Chart</Link>
+            </Tab>
+            <Tab isActive={priceMatch !== null}>
+              <Link to={`/${coinId}/price`}>Price</Link>
+            </Tab>
+          </Tabs>
 
-
-            <Switch>
+          <Switch>
             <Route path={`/:coinId/price`}>
-              <Price />
+              <Price priceData={priceInfo?.quotes.USD}/>
             </Route>
             <Route path={`/:coinId/chart`}>
-              <Chart coinId={coinId}/>
+              <Chart coinId={coinId} />
             </Route>
           </Switch>
         </>

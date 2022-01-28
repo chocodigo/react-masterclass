@@ -1,8 +1,9 @@
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import {useQuery} from 'react-query'
-import {fetchCoins} from "../api";
+import { useQuery } from "react-query";
+import { fetchCoins } from "../api";
+import { Helmet } from "react-helmet";
 
 const Container = styled.div`
   padding: 0px 20px;
@@ -32,6 +33,7 @@ const Coin = styled.li`
     transition: color 0.2s ease-in;
     align-items: center;
   }
+
   &:hover {
     a {
       color: ${(props) => props.theme.accentColor};
@@ -66,11 +68,13 @@ const Img = styled.img`
 `;
 
 function Coins() {
-
-  const {isLoading,data}=useQuery<ICoin[]>("allCoins",fetchCoins)
+  const { isLoading, data } = useQuery<ICoin[]>("allCoins", fetchCoins);
 
   return (
     <Container>
+      <Helmet>
+        <title>코인</title>
+      </Helmet>
       <Header>
         <Title>코인</Title>
       </Header>
@@ -78,7 +82,7 @@ function Coins() {
         {isLoading ? (
           <Loader>Loading...</Loader>
         ) : (
-            data?.slice(0,100).map((coin) => (
+          data?.slice(0, 100).map((coin) => (
             <Coin key={coin.id}>
               <Link
                 to={{
