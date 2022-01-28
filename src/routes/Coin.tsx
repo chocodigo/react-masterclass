@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import {Switch,Route} from "react-router-dom";
 import Price from "./Price";
 import Chart from "./Chart";
+import {useQuery} from "react-query";
+import {fetchCoinInfo, fetchCoinTickers} from "../api";
 
 const Container = styled.div`
   padding: 0px 20px;
@@ -138,29 +140,32 @@ interface PriceData {
 }
 
 function Coin() {
-  const [loading, setLoading] = useState(true);
   const { coinId } = useParams<RouteParams>();
   const { state } = useLocation<RouteState>();
-  const [info, setInfo] = useState<InfoData>();
-  const [priceInfo, setPriceInfo] = useState<PriceData>();
+  // const [loading, setLoading] = useState(true);
+  // const [info, setInfo] = useState<InfoData>();
+  // const [priceInfo, setPriceInfo] = useState<PriceData>();
   const priceMatch=useRouteMatch("/:coinId/price");
   const chartMatch=useRouteMatch("/:coinId/chart");
 
+  const {isLoading : infoLoading ,data: info}=useQuery<InfoData>(["info",coinId],()=>fetchCoinInfo(coinId))
+    const {isLoading : tickersLoading,data:priceInfo}=useQuery<PriceData>(["tickers",coinId],()=>fetchCoinTickers(coinId));
+  //
+  // useEffect(() => {
+  //   (async () => {
+  //     const infoData = await (
+  //       await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)
+  //     ).json();
+  //     const priceData = await (
+  //       await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
+  //     ).json();
+  //     setInfo(infoData);
+  //     setPriceInfo(priceData);
+  //     setLoading(false)
+  //   })();
+  // }, [coinId]);
 
-  useEffect(() => {
-    (async () => {
-      const infoData = await (
-        await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)
-      ).json();
-      const priceData = await (
-        await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
-      ).json();
-      setInfo(infoData);
-      setPriceInfo(priceData);
-      setLoading(false)
-    })();
-  }, [coinId]);
-
+    const loading = infoLoading || tickersLoading;
   return (
     <Container>
       <Header>
@@ -214,7 +219,7 @@ function Coin() {
               <Price />
             </Route>
             <Route path={`/:coinId/chart`}>
-              <Chart />
+              <Chart coinId={coinId}/>
             </Route>
           </Switch>
         </>
