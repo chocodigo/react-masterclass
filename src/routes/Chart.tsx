@@ -50,11 +50,23 @@ function Chart({coinId}:ChartProps){
                     },
                     axisBorder:{
                       show:false
-                    }
+                    },
+                    type:"datetime",
+                    categories:data?.map(item=> item.time_close),
                 },
                 stroke:{
                     curve:"smooth",
                     width: 4,
+                },
+                fill:{
+                    type:"gradient",
+                    gradient:{gradientToColors:["#839fa8"], stops:[0,100]}
+                },
+                colors:["#d85179"],
+                tooltip:{
+                    y:{
+                        formatter:(value)=>`$ ${value.toFixed(2)}`
+                    }
                 }
             }}/>}
         </div>);
