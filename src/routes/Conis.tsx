@@ -1,9 +1,11 @@
 import styled from "styled-components";
-import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { useQuery } from "react-query";
-import { fetchCoins } from "../api";
-import { Helmet } from "react-helmet";
+import {Link} from "react-router-dom";
+import {useEffect, useState} from "react";
+import {useQuery} from "react-query";
+import {fetchCoins} from "../api";
+import {Helmet} from "react-helmet";
+import {useSetRecoilState} from "recoil";
+import {isDarkAtom} from "../atoms";
 
 const Container = styled.div`
   padding: 0px 20px;
@@ -47,13 +49,13 @@ const Title = styled.h1`
 `;
 
 interface ICoin {
-  id: string;
-  name: string;
-  symbol: string;
-  rank: number;
-  is_new: boolean;
-  is_active: boolean;
-  type: string;
+    id: string;
+    name: string;
+    symbol: string;
+    rank: number;
+    is_new: boolean;
+    is_active: boolean;
+    type: string;
 }
 
 const Loader = styled.span`
@@ -67,41 +69,47 @@ const Img = styled.img`
   margin-right: 10px;
 `;
 
-function Coins() {
-  const { isLoading, data } = useQuery<ICoin[]>("allCoins", fetchCoins);
+interface ICoinsProps {
 
-  return (
-    <Container>
-      <Helmet>
-        <title>코인</title>
-      </Helmet>
-      <Header>
-        <Title>코인</Title>
-        <button>Toggle Mode</button>
-      </Header>
-      <CoinsList>
-        {isLoading ? (
-          <Loader>Loading...</Loader>
-        ) : (
-          data?.slice(0, 100).map((coin) => (
-            <Coin key={coin.id}>
-              <Link
-                to={{
-                  pathname: `/${coin.id}`,
-                  state: { name: coin.name },
-                }}
-              >
-                <Img
-                  src={`https://cryptoicon-api.vercel.app/api/icon/${coin.symbol.toLowerCase()}`}
-                />
-                {coin.name} &rarr;
-              </Link>
-            </Coin>
-          ))
-        )}
-      </CoinsList>
-    </Container>
-  );
+}
+
+function Coins({}: ICoinsProps) {
+    const setDarkAtom = useSetRecoilState(isDarkAtom)
+    const toggleDarkAtom = () => setDarkAtom(prev=> !prev);
+    const {isLoading, data} = useQuery<ICoin[]>("allCoins", fetchCoins);
+
+    return (
+        <Container>
+            <Helmet>
+                <title>코인</title>
+            </Helmet>
+            <Header>
+                <Title>코인</Title>
+                <button onClick={toggleDarkAtom}>Toggle Mode</button>
+            </Header>
+            <CoinsList>
+                {isLoading ? (
+                    <Loader>Loading...</Loader>
+                ) : (
+                    data?.slice(0, 100).map((coin) => (
+                        <Coin key={coin.id}>
+                            <Link
+                                to={{
+                                    pathname: `/${coin.id}`,
+                                    state: {name: coin.name},
+                                }}
+                            >
+                                <Img
+                                    src={`https://cryptoicon-api.vercel.app/api/icon/${coin.symbol.toLowerCase()}`}
+                                />
+                                {coin.name} &rarr;
+                            </Link>
+                        </Coin>
+                    ))
+                )}
+            </CoinsList>
+        </Container>
+    );
 }
 
 export default Coins;

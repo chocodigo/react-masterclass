@@ -2,7 +2,11 @@ import { BrowserRouter, Switch, Route } from "react-router-dom";
 import Coins from "./routes/Conis";
 import Coin from "./routes/Coin";
 
-function Router() {
+interface IRouteProps {
+
+}
+
+function Router({  }: IRouteProps) {
   return (
     <BrowserRouter basename={process.env.PUBLIC_URL}>
       <Switch>
@@ -10,7 +14,7 @@ function Router() {
           <Coin />
         </Route>
         <Route path={"/"}>
-          <Coins />
+          <Coins  />
         </Route>
       </Switch>
     </BrowserRouter>
